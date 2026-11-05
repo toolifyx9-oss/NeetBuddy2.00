@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>NEETBuddy — Practice Smarter. Score Higher. Crack NEET.</title>
+    <meta name="description" content="Complete NEET Preparation Platform with Chapter-wise Practice, Mock Tests, AI Doubt Solver, and Admin CMS" />
+    <meta property="og:title" content="NEETBuddy — Practice Smarter. Score Higher. Crack NEET." />
+    <meta property="og:description" content="Complete NEET Preparation Platform with Chapter-wise Practice, Mock Tests, AI Doubt Solver, and Admin CMS" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/assets/aistudio/file_00000000078482078d06c74a563d6525_4715f81f.png">
+    <style>
+      #nb-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, #0c2d20 0%, #051910 100%);
+        color: #e7f3ec;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        text-align: center;
+        transition: opacity 0.55s cubic-bezier(0.4, 0, 0.2, 1), transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: all;
+      }
+      #nb-splash.nb-hide {
+        opacity: 0;
+        transform: scale(1.05);
+        pointer-events: none;
+      }
+      .nb-splash-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        animation: nbPopIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      .nb-splash-logo-box {
+        position: relative;
+        display: grid;
+        place-items: center;
+        margin-bottom: 24px;
+      }
+      .nb-splash-glow {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(20, 163, 102, 0.35) 0%, rgba(11, 107, 69, 0.2) 50%, transparent 75%);
+        filter: blur(30px);
+        animation: nbGlowPulse 2.5s ease-in-out infinite alternate;
+      }
+      .nb-splash-img {
+        position: relative;
+        z-index: 2;
+        width: clamp(230px, 45vw, 340px);
+        height: auto;
+        max-height: 220px;
+        object-fit: contain;
+        filter: drop-shadow(0 20px 45px rgba(20, 163, 102, 0.4)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
+        animation: nbLogoAnimate 2.8s ease-in-out infinite;
+      }
+      .nb-splash-tagline {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #7be0a8;
+        margin-bottom: 22px;
+        opacity: 0.95;
+      }
+      .nb-splash-track {
+        width: 220px;
+        height: 5px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+      .nb-splash-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #14a366, #7be0a8);
+        animation: nbFill 2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      @keyframes nbPopIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes nbLogoAnimate {
+        0% { transform: translateY(0px) scale(0.98); }
+        50% { transform: translateY(-8px) scale(1.02); }
+        100% { transform: translateY(0px) scale(0.98); }
+      }
+      @keyframes nbGlowPulse {
+        0% { opacity: 0.5; transform: scale(0.9); }
+        100% { opacity: 1; transform: scale(1.25); }
+      }
+      @keyframes nbFill {
+        0% { width: 0%; }
+        60% { width: 80%; }
+        100% { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Professional Animated Splash Screen -->
+    <div id="nb-splash" class="nb-splash-screen" aria-label="Loading NEETBuddy">
+      <div class="nb-splash-card">
+        <div class="nb-splash-logo-box">
+          <div class="nb-splash-glow"></div>
+          <img src="/assets/aistudio/file_00000000f4e48211818e5cad3b07282e_bd13d945.png" alt="NEETBuddy 3D Logo" class="nb-splash-img" />
+        </div>
+        <div class="nb-splash-tagline">Practice Smarter • Score Higher • Crack NEET</div>
+        <div class="nb-splash-track">
+          <div class="nb-splash-fill"></div>
+        </div>
+      </div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

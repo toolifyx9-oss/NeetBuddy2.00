@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix NEETBuddy Full-Stack Transformer",
+  "description": "Seamlessly upgrade your existing NEETBuddy website into a fully functional, production-ready platform powered by Supabase and PostgreSQL.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
