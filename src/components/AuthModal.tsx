@@ -15,7 +15,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ initialMode, onSuccess, on
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [classLevel, setClassLevel] = useState('Class 12');
-  const [targetYear, setTargetYear] = useState('2027');
+  const [targetYear, setTargetYear] = useState('2026');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -156,7 +156,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ initialMode, onSuccess, on
                   onChange={(e) => setTargetYear(e.target.value)}
                   className="w-full h-11 px-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-sm border-0 outline-none"
                 >
-                  <option>2027</option>
+                  <option>2026</option>
                   <option>2027</option>
                   <option>2028</option>
                 </select>

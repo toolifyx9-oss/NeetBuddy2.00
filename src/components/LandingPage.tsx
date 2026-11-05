@@ -42,7 +42,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, darkMode, 
       <section className="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <span className="inline-block px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-xs uppercase tracking-wide mb-4">
-            NEET UG 2027 Platform
+            NEET UG 2026 Platform
           </span>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
             Crack NEET with <span className="text-emerald-600 dark:text-emerald-400">smart practice</span>
@@ -73,7 +73,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, darkMode, 
             Improve Faster.
           </h2>
           <p className="mt-2 text-emerald-100 text-sm">
-            NMC 2027 syllabus aligned question bank with instant explanations and analytics.
+            NMC 2026 syllabus aligned question bank with instant explanations and analytics.
           </p>
           <div className="grid grid-cols-2 gap-4 mt-8">
             <div className="bg-white/15 backdrop-blur-md p-4 rounded-2xl">
@@ -121,7 +121,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, darkMode, 
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 mt-16 py-8 text-center text-xs text-slate-500">
-        © 2027 NEETBuddy. All rights reserved. Powered by AlphaDev.
+        © 2026 NEETBuddy. All rights reserved. Powered by AlphaDev.
       </footer>
     </div>
   );

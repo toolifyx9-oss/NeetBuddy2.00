@@ -177,8 +177,6 @@ export default function App() {
       ['flash', '🃏', 'Flashcards'],
       ['doubt', '💡', 'Doubt Solver', 'AI'],
       ['plan', '📅', 'Study Plan'],
-      ['supabase', '⚡', 'Supabase Cloud'],
-      ['admin', '🛠️', 'Admin CMS'],
       ['more', '⚙️', 'More'],
     ];
 
@@ -290,7 +288,7 @@ export default function App() {
           }</button>`
       ).join(
         ''
-      )}<div class="qc">Discipline today.<br>Doctor tomorrow.</div></aside><main class="mn"><div class="tp"><div class="mb"><b class="lg3">${LGO}<span class="lt">NEET<b style="color:#2563eb!important">Buddy</b></span></b></div><button class="nb-sb-pill" onclick="window.nbGo('supabase')" title="Manage Real Supabase Backend" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid rgba(16,185,129,0.35);background:rgba(16,185,129,0.1);color:#10b981;cursor:pointer;margin-right:auto"><span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 6px #10b981"></span>⚡ Supabase Cloud</button><button class="ib tg" aria-label="Toggle dark mode" onclick="window.nbTgd()">${
+      )}<div class="qc">Discipline today.<br>Doctor tomorrow.</div></aside><main class="mn"><div class="tp"><div class="mb"><b class="lg3">${LGO}<span class="lt">NEET<b style="color:#2563eb!important">Buddy</b></span></b></div><button class="ib tg" aria-label="Toggle dark mode" onclick="window.nbTgd()">${
         dm ? '🌙' : '☀️'
       }</button><button class="ib">🔔<span class="dot"></span></button><div class="us" onclick="window.nbGo('more')" style="cursor:pointer"><div class="av">${UI()}</div><span><b>${UN()}</b><small>${UY()}</small></span></div></div>${body}</main><nav class="bt">${TABS.map(
         (t) =>
@@ -2266,128 +2264,17 @@ export default function App() {
           bc(['More', 'more'], ['Premium Pass'])
         ),
 
-      supabase: () => {
-        // Trigger health check automatically when opening this view
-        setTimeout(() => {
-          if (typeof (window as any).nbTestSupabase === 'function') {
-            (window as any).nbTestSupabase();
-          }
-        }, 80);
-
-        const savedUrl = localStorage.getItem('neetbuddy_supabase_url') || '';
-        const savedKey = localStorage.getItem('neetbuddy_supabase_key') || '';
-
-        return shell(
-          hero(
-            'Real Supabase Cloud Backend',
-            'Connect, inspect, and synchronize your live PostgreSQL database, row-level security, and question bank.'
-          ) +
-            `<div class="card" style="margin-bottom:18px;background:linear-gradient(135deg,rgba(16,185,129,0.06),rgba(37,99,235,0.05));border:1px solid rgba(16,185,129,0.25)">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
-                <div>
-                  <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-                    <span id="sb-status-dot" style="width:12px;height:12px;border-radius:50%;background:#10b981;box-shadow:0 0 10px #10b981;display:inline-block"></span>
-                    <h2 style="font-size:20px;font-weight:800;color:var(--ink);margin:0">Supabase Cloud PostgreSQL</h2>
-                    <span id="sb-status-badge" class="chip c3" style="font-size:12px">Connecting…</span>
-                  </div>
-                  <p id="sb-status-desc" style="color:var(--mu);font-size:13.5px;margin:0">Live Supabase integration with high-performance query caching & local persistence fallback.</p>
-                </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap">
-                  <button class="btn sm o" onclick="window.nbTestSupabase()">🔄 Ping & Check</button>
-                  <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" class="btn sm" style="text-decoration:none">Supabase Dashboard ↗</a>
-                </div>
-              </div>
-
-              <div class="g g4 tl" style="margin-top:18px">
-                <div class="tile" style="background:#e8f7e6"><div class="ti">📖</div><h3>Questions</h3><b id="sb-stat-q" style="font-size:22px;color:#10b981">--</b><small>In questions table</small></div>
-                <div class="tile" style="background:#e6f0ff"><div class="ti">👥</div><h3>Profiles</h3><b id="sb-stat-u" style="font-size:22px;color:#2563eb">--</b><small>In profiles table</small></div>
-                <div class="tile" style="background:#f0e8ff"><div class="ti">📝</div><h3>Test Attempts</h3><b id="sb-stat-t" style="font-size:22px;color:#9333ea">--</b><small>In test_attempts table</small></div>
-                <div class="tile" style="background:#fff0e4"><div class="ti">🛡️</div><h3>Audit Logs</h3><b id="sb-stat-a" style="font-size:22px;color:#ea580c">--</b><small>In audit_logs table</small></div>
-              </div>
-            </div>
-
-            <div class="hg">
-              <div class="s6 card" style="display:flex;flex-direction:column;gap:12px">
-                <h3 style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px"><span>🔑</span> Connect Supabase Credentials</h3>
-                <p style="color:var(--mu);font-size:13px;margin:0">Enter your project credentials from your <a href="https://supabase.com/dashboard" target="_blank" style="color:#2563eb;font-weight:700">Supabase Project Settings → API</a>. The app will immediately test and connect live!</p>
-                
-                <div>
-                  <label style="display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px">Supabase Project URL</label>
-                  <input id="sb-inp-url" type="text" placeholder="https://xyzcompany.supabase.co" value="${esc(savedUrl)}" style="width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--ln);background:var(--cd2);color:var(--ink);font-size:13px;outline:none" />
-                </div>
-
-                <div>
-                  <label style="display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px">Supabase API Key (Anon / Service Role)</label>
-                  <input id="sb-inp-key" type="password" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="${esc(savedKey)}" style="width:100%;padding:11px 14px;border-radius:14px;border:1px solid var(--ln);background:var(--cd2);color:var(--ink);font-size:13px;outline:none" />
-                </div>
-
-                <div style="display:flex;gap:10px;margin-top:6px">
-                  <button class="btn sm" onclick="window.nbSaveSupabaseConfig()">💾 Save & Connect Live</button>
-                  <button class="btn sm o" onclick="window.nbTestSupabase()">⚡ Test Connection</button>
-                </div>
-              </div>
-
-              <div class="s6 card" style="display:flex;flex-direction:column;gap:12px">
-                <h3 style="font-size:18px;font-weight:800;display:flex;align-items:center;gap:8px"><span>🚀</span> Quick Database Tools</h3>
-                <p style="color:var(--mu);font-size:13px;margin:0">Seed canonical NEET questions or copy the ready-to-run master PostgreSQL schema for your Supabase SQL Editor.</p>
-
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
-                  <div style="padding:12px 14px;border-radius:16px;background:var(--bg);border:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                      <b style="display:block;font-size:14px;color:var(--ink)">Seed 50+ Canonical NEET Qs</b>
-                      <small style="color:var(--mu)">Batch insert physics, chemistry, botany & zoology questions</small>
-                    </div>
-                    <button class="btn sm" onclick="window.nbSeedSupabase()">🌱 Seed Qs</button>
-                  </div>
-
-                  <div style="padding:12px 14px;border-radius:16px;background:var(--bg);border:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                      <b style="display:block;font-size:14px;color:var(--ink)">Master SQL Schema Migration</b>
-                      <small style="color:var(--mu)">Complete 266-line schema with RLS policies and indexes</small>
-                    </div>
-                    <button class="btn sm o" onclick="window.nbCopySchemaSql()">📋 Copy SQL</button>
-                  </div>
-
-                  <div style="padding:12px 14px;border-radius:16px;background:var(--bg);border:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center">
-                    <div>
-                      <b style="display:block;font-size:14px;color:var(--ink)">Admin CMS & PDF Ingestion</b>
-                      <small style="color:var(--mu)">Manage questions and import test papers</small>
-                    </div>
-                    <button class="btn sm o" onclick="window.nbGo('admin')">Manage CMS →</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:18px">
-              <h3 style="font-size:18px;font-weight:800;margin-bottom:8px">📋 PostgreSQL Tables Structure</h3>
-              <p style="color:var(--mu);font-size:13px;margin-bottom:14px">NEETBuddy's real backend communicates with the following Supabase tables:</p>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#10b981">public.questions</b><br><small style="color:var(--mu)">50,000+ Question Bank scaling, JSONB options, NCERT refs</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#2563eb">public.profiles</b><br><small style="color:var(--mu)">Student & Educator accounts with RBAC roles</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#9333ea">public.test_attempts</b><br><small style="color:var(--mu)">Completed test sessions, marks, accuracy, +4/-1</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#ea580c">public.test_responses</b><br><small style="color:var(--mu)">Question-by-question response audits</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#059669">public.notes</b><br><small style="color:var(--mu)">Chapter-wise student markdown/rich notes</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#0284c7">public.flashcards</b><br><small style="color:var(--mu)">Active recall flip decks by subject</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#6366f1">public.study_tasks</b><br><small style="color:var(--mu)">Weekly day-by-day revision checklist</small></div>
-                <div style="padding:10px 14px;border-radius:14px;background:var(--bg);border:1px solid var(--ln)"><b style="color:#e11d48">public.audit_logs</b><br><small style="color:var(--mu)">Security & admin activity tracing</small></div>
-              </div>
-            </div>`,
-          bc(['Supabase Cloud Backend'])
-        );
-      },
-
       admin: () =>
         shell(
           hero(
             'Admin Content Management',
-            'Manage the 50,000+ Question Bank, automated PDF Ingestion, Supabase Cloud, and audit logs.'
+            'Manage the 50,000+ Question Bank, automated PDF Ingestion, and audit logs.'
           ) +
             `<div class="g g4 tl">${[
               ['Canonical Questions', '📖', '#e6f0ff', '50+ Active Qs'],
               ['PDF Import Pipeline', '📄', '#e8f7e6', 'Auto Parser Ready'],
               ['Audit Logs', '🛡️', '#fff0e4', 'Real-time logs'],
-              ['Database Engine', '⚡', '#f0e8ff', 'Supabase PostgreSQL'],
+              ['Database Engine', '⚡', '#f0e8ff', 'PostgreSQL / Supabase'],
             ]
               .map(
                 (m) =>
@@ -2395,7 +2282,7 @@ export default function App() {
               )
               .join(
                 ''
-              )}</div><div class="card" style="margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h2 style="font-size:18px;margin:0">⚡ Supabase Database Status</h2><button class="btn sm" onclick="window.nbGo('supabase')">Manage Supabase →</button></div><p style="color:var(--mu);font-size:13px;margin:0">NEETBuddy supports real-time synchronization with Supabase. Configure credentials, seed questions, or copy the master schema in one click.</p></div><div class="card" style="margin-top:18px"><h2 style="font-size:18px;margin-bottom:8px">📄 Run Automated PDF Question Import</h2><p style="color:var(--mu);margin-bottom:14px;font-size:13px">Paste question text or upload test paper text to automatically extract statements, options (A-D), answer keys, and explanations, eliminate duplicates, and publish to the question bank.</p><textarea id="adm-raw" placeholder="Q1. What is the SI unit of force?&#10;(A) Joule&#10;(B) Newton&#10;(C) Pascal&#10;(D) Watt&#10;Answer: B&#10;Explanation: Newton is the SI unit of force." rows="5" style="width:100%;padding:12px;border-radius:16px;border:0;background:var(--cd2);color:var(--ink);font-family:monospace;font-size:12px;outline:0"></textarea><button class="btn sm" style="margin-top:10px" onclick="window.nbAdminImport()">Run Ingestion Pipeline →</button></div>`,
+              )}</div><div class="card" style="margin-top:18px"><h2 style="font-size:18px;margin-bottom:8px">📄 Run Automated PDF Question Import</h2><p style="color:var(--mu);margin-bottom:14px;font-size:13px">Paste question text or upload test paper text to automatically extract statements, options (A-D), answer keys, and explanations, eliminate duplicates, and publish to the question bank.</p><textarea id="adm-raw" placeholder="Q1. What is the SI unit of force?&#10;(A) Joule&#10;(B) Newton&#10;(C) Pascal&#10;(D) Watt&#10;Answer: B&#10;Explanation: Newton is the SI unit of force." rows="5" style="width:100%;padding:12px;border-radius:16px;border:0;background:var(--cd2);color:var(--ink);font-family:monospace;font-size:12px;outline:0"></textarea><button class="btn sm" style="margin-top:10px" onclick="window.nbAdminImport()">Run Ingestion Pipeline →</button></div>`,
           bc(['Admin CMS'])
         ),
 
@@ -3563,120 +3450,6 @@ export default function App() {
         }
       } catch (e) {
         toast('Batch parsed into question bank');
-      }
-    };
-
-    // Supabase Backend Action Handlers
-    (window as any).nbTestSupabase = async () => {
-      const badge = document.getElementById('sb-status-badge');
-      const dot = document.getElementById('sb-status-dot');
-      const desc = document.getElementById('sb-status-desc');
-      if (badge) badge.textContent = 'Pinging…';
-      try {
-        const res = await fetch('/api/supabase/status');
-        const data = await res.json();
-        const sq = document.getElementById('sb-stat-q');
-        const su = document.getElementById('sb-stat-u');
-        const st = document.getElementById('sb-stat-t');
-        const sa = document.getElementById('sb-stat-a');
-        if (sq) sq.textContent = String(data.tableStats?.questions ?? '--');
-        if (su) su.textContent = String(data.tableStats?.users ?? '--');
-        if (st) st.textContent = String(data.tableStats?.testAttempts ?? '--');
-        if (sa) sa.textContent = String(data.tableStats?.auditLogs ?? '--');
-
-        if (data.connected) {
-          if (badge) {
-            badge.className = 'chip c3';
-            badge.textContent = `Connected (${data.latencyMs}ms)`;
-          }
-          if (dot) dot.style.background = '#10b981';
-          if (desc) desc.textContent = `Connected to live Supabase project (${data.url || 'Cloud'}). All data operations are securely synced.`;
-          toast('Supabase Backend is Live & Connected 🟢');
-        } else if (data.configured) {
-          if (badge) {
-            badge.className = 'chip c4';
-            badge.textContent = 'Connection Issue';
-          }
-          if (dot) dot.style.background = '#ef4444';
-          if (desc) desc.textContent = data.error || 'Failed to ping Supabase. Check project URL & API key.';
-        } else {
-          if (badge) {
-            badge.className = 'chip c2';
-            badge.textContent = 'Local Cache Mode';
-          }
-          if (dot) dot.style.background = '#f59e0b';
-          if (desc) desc.textContent = 'Running in high-speed local persistence mode. Enter your Supabase Project URL & Key below to connect live cloud database.';
-        }
-      } catch (err: any) {
-        if (badge) {
-          badge.className = 'chip c4';
-          badge.textContent = 'Offline';
-        }
-      }
-    };
-
-    (window as any).nbSaveSupabaseConfig = async () => {
-      const urlInp = document.getElementById('sb-inp-url') as HTMLInputElement;
-      const keyInp = document.getElementById('sb-inp-key') as HTMLInputElement;
-      const url = urlInp ? urlInp.value.trim() : '';
-      const key = keyInp ? keyInp.value.trim() : '';
-      if (!url || !key) return toast('Please enter both Supabase URL and Key');
-
-      toast('Testing and connecting to Supabase…');
-      try {
-        const res = await fetch('/api/supabase/config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url, key })
-        });
-        const data = await res.json();
-        if (data.success) {
-          localStorage.setItem('neetbuddy_supabase_url', url);
-          localStorage.setItem('neetbuddy_supabase_key', key);
-          if (data.connected) {
-            toast('Supabase successfully connected! 🚀');
-            confetti();
-          } else {
-            toast('Credentials saved. Note: ' + (data.error || 'Ready for tables'));
-          }
-          (window as any).nbTestSupabase();
-        } else {
-          toast('Error saving configuration: ' + (data.error || 'Unknown error'));
-        }
-      } catch (e: any) {
-        toast('Connection attempt failed: ' + (e?.message || 'Error'));
-      }
-    };
-
-    (window as any).nbSeedSupabase = async () => {
-      toast('Seeding 50+ NEET questions into Supabase…');
-      try {
-        const res = await fetch('/api/supabase/seed', { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-          toast(data.message || 'Seeded canonical question bank into Supabase!');
-          confetti();
-          (window as any).nbTestSupabase();
-        } else {
-          toast('Seeding failed: ' + (data.error || 'Check Supabase status'));
-        }
-      } catch (e: any) {
-        toast('Failed to seed: ' + (e?.message || 'Error'));
-      }
-    };
-
-    (window as any).nbCopySchemaSql = async () => {
-      try {
-        const res = await fetch('/api/supabase/schema-sql');
-        const data = await res.json();
-        if (data.sql) {
-          await navigator.clipboard.writeText(data.sql);
-          toast('Master Supabase SQL Schema copied to clipboard! 📋');
-        } else {
-          toast('Could not load schema SQL');
-        }
-      } catch (e) {
-        toast('Error copying schema SQL');
       }
     };
 

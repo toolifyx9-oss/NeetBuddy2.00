@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const userName = currentUser ? currentUser.fullName : 'Ayush Kumar';
   const initial = userName.trim()[0].toUpperCase();
-  const yearText = currentUser ? `NEET ${currentUser.targetYear}` : 'NEET 2027';
+  const yearText = currentUser ? `NEET ${currentUser.targetYear}` : 'NEET 2026';
 
   return (
     <div className="w-full">

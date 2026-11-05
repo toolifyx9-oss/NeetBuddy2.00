@@ -1,23 +1,12 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
-import fs from 'fs';
 import multer from 'multer';
 import { GoogleGenAI } from '@google/genai';
 import { db } from './src/lib/db';
 import { INITIAL_QUESTION_BANK } from './src/data/initialQuestionBank';
 import { NEET_SYLLABUS } from './src/data/syllabus';
 import { Question, SubjectName, TestResultSummary } from './src/types/neetbuddy';
-import {
-  getSupabaseBackendClient,
-  getSupabaseStats,
-  saveSupabaseConfig,
-  seedQuestionsToSupabase,
-  getQuestionsFromSupabase,
-  addQuestionToSupabase,
-  recordTestAttemptToSupabase,
-  testSupabaseConnection
-} from './src/lib/supabaseBackend';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024 } });
 
@@ -34,62 +23,8 @@ async function createServer() {
 
   // --- API ROUTES ---
 
-  // 0. Supabase Backend Management & Integration Endpoints
-  app.get('/api/supabase/status', async (_req: Request, res: Response) => {
-    try {
-      const stats = await getSupabaseStats();
-      return res.json(stats);
-    } catch (err: any) {
-      return res.status(500).json({ error: err?.message || 'Failed to check Supabase status' });
-    }
-  });
-
-  app.post('/api/supabase/config', async (req: Request, res: Response) => {
-    const { url, key } = req.body;
-    if (!url || !key) {
-      return res.status(400).json({ error: 'Both Supabase URL and API Key are required.' });
-    }
-
-    try {
-      const saved = saveSupabaseConfig(url, key);
-      const test = await testSupabaseConnection();
-      return res.json({
-        success: true,
-        saved: true,
-        connected: test.connected,
-        latencyMs: test.latencyMs,
-        error: test.error,
-        url: saved.url
-      });
-    } catch (err: any) {
-      return res.status(500).json({ error: err?.message || 'Failed to save Supabase configuration' });
-    }
-  });
-
-  app.post('/api/supabase/seed', async (_req: Request, res: Response) => {
-    try {
-      const result = await seedQuestionsToSupabase();
-      return res.json(result);
-    } catch (err: any) {
-      return res.status(500).json({ error: err?.message || 'Failed to seed questions to Supabase' });
-    }
-  });
-
-  app.get('/api/supabase/schema-sql', (_req: Request, res: Response) => {
-    try {
-      const schemaPath = path.resolve(process.cwd(), 'supabase/migrations/20261103000000_neetbuddy_master_schema.sql');
-      if (fs.existsSync(schemaPath)) {
-        const sql = fs.readFileSync(schemaPath, 'utf-8');
-        return res.json({ sql, filename: '20261103000000_neetbuddy_master_schema.sql' });
-      }
-      return res.status(404).json({ error: 'Master SQL schema migration file not found.' });
-    } catch (err: any) {
-      return res.status(500).json({ error: err?.message || 'Failed to read schema SQL' });
-    }
-  });
-
   // 1. Auth Endpoints
-  app.post('/api/auth/register', async (req: Request, res: Response) => {
+  app.post('/api/auth/register', (req: Request, res: Response) => {
     const { fullName, email, phone, targetYear, classLevel, password } = req.body;
     if (!fullName || !email || !password) {
       return res.status(400).json({ error: 'Missing required fields: fullName, email, password' });
@@ -111,54 +46,17 @@ async function createServer() {
       createdAt: new Date().toISOString()
     });
 
-    // Sync to Supabase profiles table if Supabase is connected
-    const sbClient = getSupabaseBackendClient();
-    if (sbClient) {
-      try {
-        await sbClient.from('profiles').upsert({
-          full_name: newUser.fullName,
-          email: newUser.email,
-          phone: newUser.phone,
-          target_year: newUser.targetYear,
-          class_level: newUser.classLevel
-        }, { onConflict: 'email' });
-      } catch (e) {
-        console.warn('Could not sync profile to Supabase:', e);
-      }
-    }
-
     db.logAudit(newUser.email, 'USER_REGISTER', 'USER', `Registered user ${newUser.fullName} (${newUser.role})`);
     return res.json({ user: newUser, token: 'mock-jwt-' + newUser.id });
   });
 
-  app.post('/api/auth/login', async (req: Request, res: Response) => {
+  app.post('/api/auth/login', (req: Request, res: Response) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Please enter email/phone and password.' });
     }
 
-    let user = db.getUserByEmail(email);
-
-    // If not in local db, check Supabase profiles
-    const sbClient = getSupabaseBackendClient();
-    if (!user && sbClient) {
-      try {
-        const { data } = await sbClient.from('profiles').select('*').eq('email', email.toLowerCase().trim()).single();
-        if (data) {
-          user = db.addUser({
-            id: data.id || 'usr-' + Date.now(),
-            fullName: data.full_name || email.split('@')[0],
-            email: data.email,
-            phone: data.phone || '',
-            targetYear: data.target_year || 2026,
-            classLevel: data.class_level || 'Class 12',
-            role: email.toLowerCase().includes('admin') ? 'admin' : 'student',
-            createdAt: data.created_at || new Date().toISOString()
-          });
-        }
-      } catch (e) {}
-    }
-
+    const user = db.getUserByEmail(email);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials. No user found with this email.' });
     }
@@ -172,36 +70,43 @@ async function createServer() {
     return res.json({ syllabus: NEET_SYLLABUS });
   });
 
-  // 3. Questions API (Powered by Supabase with Local Fallback)
-  app.get('/api/questions', async (req: Request, res: Response) => {
+  // 3. Questions API (Search, Filter, Pagination, CRUD)
+  app.get('/api/questions', (req: Request, res: Response) => {
     const { subject, chapter, topic, search, limit = '50', page = '1' } = req.query;
+    let questions = db.getQuestions();
+
+    if (subject && typeof subject === 'string') {
+      questions = questions.filter(q => q.subject.toLowerCase() === subject.toLowerCase());
+    }
+    if (chapter && typeof chapter === 'string') {
+      questions = questions.filter(q => q.chapter.toLowerCase() === chapter.toLowerCase());
+    }
+    if (topic && typeof topic === 'string') {
+      questions = questions.filter(q => q.topic.toLowerCase() === topic.toLowerCase());
+    }
+    if (search && typeof search === 'string') {
+      const term = search.toLowerCase();
+      questions = questions.filter(q =>
+        q.statement.toLowerCase().includes(term) ||
+        q.chapter.toLowerCase().includes(term) ||
+        q.topic.toLowerCase().includes(term)
+      );
+    }
+
     const lim = Math.min(100, Number(limit) || 50);
     const pg = Math.max(1, Number(page) || 1);
+    const total = questions.length;
+    const paginated = questions.slice((pg - 1) * lim, pg * lim);
 
-    try {
-      const result = await getQuestionsFromSupabase({
-        subject: typeof subject === 'string' ? subject : undefined,
-        chapter: typeof chapter === 'string' ? chapter : undefined,
-        topic: typeof topic === 'string' ? topic : undefined,
-        search: typeof search === 'string' ? search : undefined,
-        limit: lim,
-        page: pg
-      });
-
-      return res.json({
-        questions: result.questions,
-        total: result.total,
-        page: pg,
-        totalPages: Math.ceil(result.total / lim),
-        source: result.source
-      });
-    } catch (err: any) {
-      console.error('Error fetching questions:', err);
-      return res.status(500).json({ error: 'Failed to retrieve questions.' });
-    }
+    return res.json({
+      questions: paginated,
+      total,
+      page: pg,
+      totalPages: Math.ceil(total / lim)
+    });
   });
 
-  app.post('/api/questions', async (req: Request, res: Response) => {
+  app.post('/api/questions', (req: Request, res: Response) => {
     const { subject, chapter, topic, statement, options, correctOptionIndex, explanation, difficulty, ncertReference } = req.body;
     if (!subject || !chapter || !statement || !options || correctOptionIndex === undefined) {
       return res.status(400).json({ error: 'Missing required question fields.' });
@@ -224,9 +129,9 @@ async function createServer() {
       createdAt: new Date().toISOString()
     };
 
-    const saved = await addQuestionToSupabase(newQuestion);
+    db.addQuestion(newQuestion);
     db.logAudit('admin@neetbuddy.com', 'CREATE_QUESTION', 'QUESTION', `Created question in ${subject} -> ${chapter}`);
-    return res.status(201).json({ question: saved });
+    return res.status(201).json({ question: newQuestion });
   });
 
   app.put('/api/questions/:id', (req: Request, res: Response) => {
@@ -358,7 +263,7 @@ Explanation: Standard acceleration due to gravity g = 9.8 m/s².
   });
 
   // 5. Test Submission & Server-side Auto Grading
-  app.post('/api/tests/submit', async (req: Request, res: Response) => {
+  app.post('/api/tests/submit', (req: Request, res: Response) => {
     const { testName, type, questions, userAnswers, durationSeconds } = req.body;
     if (!questions || !userAnswers) {
       return res.status(400).json({ error: 'Missing questions or userAnswers.' });
@@ -408,7 +313,7 @@ Explanation: Standard acceleration due to gravity g = 9.8 m/s².
       subjectBreakdown
     };
 
-    await recordTestAttemptToSupabase(resultSummary, userAnswers, questions);
+    db.addTestResult(resultSummary);
     db.logAudit('ayush@neetbuddy.com', 'SUBMIT_TEST', 'TEST_ATTEMPT', `Scored ${score}/${totalMarks} (${accuracyPercentage}%) in ${testName}`);
 
     return res.json({ result: resultSummary });
@@ -474,12 +379,11 @@ Format your text response cleanly with clear points or concise explanations.`;
   });
 
   // 7. Admin Metrics & Audit Logs
-  app.get('/api/admin/stats', async (_req: Request, res: Response) => {
+  app.get('/api/admin/stats', (_req: Request, res: Response) => {
     const questions = db.getQuestions();
     const users = db.getUsers();
     const testResults = db.getTestResults();
     const importBatches = db.getImportBatches();
-    const supabaseStats = await getSupabaseStats();
 
     return res.json({
       totalQuestions: questions.length,
@@ -488,7 +392,6 @@ Format your text response cleanly with clear points or concise explanations.`;
       activeStudents: users.filter(u => u.role === 'student').length,
       totalTestAttempts: testResults.length,
       totalPdfBatches: importBatches.length,
-      supabase: supabaseStats,
       subjectCounts: {
         Physics: questions.filter(q => q.subject === 'Physics').length,
         Chemistry: questions.filter(q => q.subject === 'Chemistry').length,

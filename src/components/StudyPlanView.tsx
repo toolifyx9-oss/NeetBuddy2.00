@@ -19,7 +19,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
   const [newTitle, setNewTitle] = useState('');
   const [newSubject, setNewSubject] = useState<SubjectName>('Physics');
   const [newMinutes, setNewMinutes] = useState(45);
-  const [examDate, setExamDate] = useState('2027-05-03');
+  const [examDate, setExamDate] = useState('2026-05-03');
 
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -152,7 +152,7 @@ export const StudyPlanView: React.FC<StudyPlanViewProps> = ({
         {/* Exam Countdown Card */}
         <div className="card md:col-span-4 flex flex-col justify-between items-center text-center p-6 space-y-4">
           <div>
-            <span className="chip c5 mb-2">NEET UG 2027</span>
+            <span className="chip c5 mb-2">NEET UG 2026</span>
             <h3 className="font-extrabold text-lg">Exam Countdown</h3>
             <p className="text-xs text-slate-500 mt-1">Keep going, every single day counts towards your rank!</p>
           </div>

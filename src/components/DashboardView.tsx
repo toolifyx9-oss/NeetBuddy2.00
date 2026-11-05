@@ -35,7 +35,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     <div className="space-y-6">
       <WavyHero
         title={`Good Day, ${firstName}! 👋`}
-        subtitle="Pick a module to continue your NEET UG 2027 preparation."
+        subtitle="Pick a module to continue your NEET UG 2026 preparation."
         quote="Consistency today, MBBS tomorrow."
       />
 

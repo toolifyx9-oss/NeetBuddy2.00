@@ -44,7 +44,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       <div className="space-y-6">
         <WavyHero
           title="Practice Questions"
-          subtitle="Choose a subject • Based on the NMC NEET UG 2027 syllabus"
+          subtitle="Choose a subject • Based on the NMC NEET UG 2026 syllabus"
           quote="Practice makes you permanent. Practise perfectly."
         />
 
@@ -79,7 +79,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({
       <div className="space-y-6">
         <WavyHero
           title={selectedSubject}
-          subtitle={`${chapters.length} Chapters • NMC NEET UG 2027 Syllabus`}
+          subtitle={`${chapters.length} Chapters • NMC NEET UG 2026 Syllabus`}
         />
 
         <div className="tabs">

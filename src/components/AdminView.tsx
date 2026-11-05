@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Question, SubjectName, AuditLog } from '../types/neetbuddy';
-import {
-  fetchAdminStats,
-  fetchAuditLogs,
-  createQuestion,
-  deleteQuestionApi,
-  parsePdfUpload,
-  fetchSupabaseStatus,
-  saveSupabaseConfigApi,
-  seedSupabaseQuestionsApi,
-  fetchSupabaseSchemaSql
-} from '../lib/api';
+import { fetchAdminStats, fetchAuditLogs, createQuestion, deleteQuestionApi, parsePdfUpload } from '../lib/api';
 import { WavyHero } from './WavyHero';
 
 interface AdminViewProps {
@@ -18,18 +8,10 @@ interface AdminViewProps {
 }
 
 export const AdminView: React.FC<AdminViewProps> = ({ onNavigate }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'questions' | 'importPdf' | 'mockTests' | 'auditLogs' | 'supabase'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'questions' | 'importPdf' | 'mockTests' | 'auditLogs'>('overview');
   const [stats, setStats] = useState<any>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Supabase State
-  const [sbStatus, setSbStatus] = useState<any>(null);
-  const [sbUrl, setSbUrl] = useState(localStorage.getItem('neetbuddy_supabase_url') || '');
-  const [sbKey, setSbKey] = useState(localStorage.getItem('neetbuddy_supabase_key') || '');
-  const [sbConnecting, setSbConnecting] = useState(false);
-  const [sbSeeding, setSbSeeding] = useState(false);
-  const [sbMessage, setSbMessage] = useState('');
 
   // Question Form State
   const [showAddModal, setShowAddModal] = useState(false);
@@ -58,8 +40,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ onNavigate }) => {
       setStats(statsData);
       const logsData = await fetchAuditLogs();
       setAuditLogs(logsData.auditLogs || []);
-      const sbData = await fetchSupabaseStatus();
-      setSbStatus(sbData);
     } catch (e) {
       console.error('Error loading admin data:', e);
     }
@@ -119,68 +99,17 @@ export const AdminView: React.FC<AdminViewProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleSaveSupabase = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!sbUrl || !sbKey) {
-      alert('Please enter both Supabase URL and Key');
-      return;
-    }
-    setSbConnecting(true);
-    setSbMessage('Testing and connecting to Supabase...');
-    try {
-      const res = await saveSupabaseConfigApi(sbUrl, sbKey);
-      localStorage.setItem('neetbuddy_supabase_url', sbUrl);
-      localStorage.setItem('neetbuddy_supabase_key', sbKey);
-      if (res.connected) {
-        setSbMessage(`Successfully connected to Supabase (${res.latencyMs}ms)! 🚀`);
-      } else {
-        setSbMessage(`Saved! Note: ${res.error || 'Ready for tables'}`);
-      }
-      loadData();
-    } catch (err: any) {
-      setSbMessage(`Connection failed: ${err.message}`);
-    } finally {
-      setSbConnecting(false);
-    }
-  };
-
-  const handleSeedQuestions = async () => {
-    setSbSeeding(true);
-    try {
-      const res = await seedSupabaseQuestionsApi();
-      alert(res.message || 'Successfully seeded questions into Supabase!');
-      loadData();
-    } catch (err: any) {
-      alert(`Seeding error: ${err.message}`);
-    } finally {
-      setSbSeeding(false);
-    }
-  };
-
-  const handleCopySchema = async () => {
-    try {
-      const res = await fetchSupabaseSchemaSql();
-      if (res.sql) {
-        await navigator.clipboard.writeText(res.sql);
-        alert('Master Supabase SQL schema copied to clipboard! Paste into your Supabase SQL Editor.');
-      }
-    } catch (e: any) {
-      alert('Failed to copy schema: ' + e?.message);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <WavyHero
         title="Admin Content Management System"
-        subtitle="Manage the 50,000+ Question Bank, PDF Ingestion Pipeline, Supabase Cloud, Mock Tests, and System Audit Logs."
+        subtitle="Manage the 50,000+ Question Bank, PDF Ingestion Pipeline, Mock Tests, and System Audit Logs."
       />
 
       {/* Admin Tabs */}
       <div className="tabs">
         {[
           { id: 'overview', label: '📊 Platform Overview' },
-          { id: 'supabase', label: '⚡ Supabase Cloud' },
           { id: 'questions', label: '📖 Question Bank CMS' },
           { id: 'importPdf', label: '📄 PDF Automated Ingestion' },
           { id: 'auditLogs', label: '🛡️ Audit Logs' }
@@ -247,194 +176,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ onNavigate }) => {
               <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200">
                 <small className="text-purple-700 font-bold block">Zoology</small>
                 <b className="text-2xl">{stats?.subjectCounts?.Zoology || 10} Qs</b>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Supabase Cloud Backend Tab */}
-      {activeTab === 'supabase' && (
-        <div className="space-y-6">
-          <div className="card bg-gradient-to-r from-emerald-50/50 via-teal-50/40 to-blue-50/40 dark:from-emerald-950/20 dark:to-blue-950/20 border border-emerald-200 dark:border-emerald-800/40">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span
-                    className={`w-3.5 h-3.5 rounded-full ${
-                      sbStatus?.connected
-                        ? 'bg-emerald-500 shadow-[0_0_10px_#10b981]'
-                        : sbStatus?.configured
-                        ? 'bg-red-500 shadow-[0_0_10px_#ef4444]'
-                        : 'bg-amber-500 shadow-[0_0_10px_#f59e0b]'
-                    }`}
-                  />
-                  <h3 className="font-extrabold text-xl">Supabase Cloud Database</h3>
-                  <span
-                    className={`chip ${
-                      sbStatus?.connected
-                        ? 'c3'
-                        : sbStatus?.configured
-                        ? 'c4'
-                        : 'c2'
-                    }`}
-                  >
-                    {sbStatus?.connected
-                      ? `Connected (${sbStatus?.latencyMs || 0}ms)`
-                      : sbStatus?.configured
-                      ? 'Connection Error'
-                      : 'Local Cache Mode'}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {sbStatus?.connected
-                    ? `Live connection established to ${sbStatus?.url || 'Supabase'}. All operations read/write directly to PostgreSQL.`
-                    : sbStatus?.error || 'Running in local persistence mode. Enter your Supabase Project URL & Key below to activate cloud syncing.'}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button className="btn sm o" onClick={loadData}>
-                  🔄 Ping &amp; Refresh
-                </button>
-                <a
-                  href="https://supabase.com/dashboard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn sm"
-                >
-                  Supabase Dashboard ↗
-                </a>
-              </div>
-            </div>
-
-            {/* Supabase Metrics Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800">
-              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-xs text-slate-500 font-bold block">Questions</span>
-                <b className="text-xl text-emerald-600">{sbStatus?.tableStats?.questions ?? '--'}</b>
-                <span className="text-[10px] text-slate-400 block">in questions table</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-xs text-slate-500 font-bold block">Profiles</span>
-                <b className="text-xl text-blue-600">{sbStatus?.tableStats?.users ?? '--'}</b>
-                <span className="text-[10px] text-slate-400 block">in profiles table</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-xs text-slate-500 font-bold block">Test Attempts</span>
-                <b className="text-xl text-purple-600">{sbStatus?.tableStats?.testAttempts ?? '--'}</b>
-                <span className="text-[10px] text-slate-400 block">in test_attempts table</span>
-              </div>
-              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-                <span className="text-xs text-slate-500 font-bold block">Audit Logs</span>
-                <b className="text-xl text-orange-600">{sbStatus?.tableStats?.auditLogs ?? '--'}</b>
-                <span className="text-[10px] text-slate-400 block">in audit_logs table</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Credentials Configuration Form */}
-            <div className="card space-y-4">
-              <h3 className="font-extrabold text-base flex items-center gap-2">
-                <span>🔑</span> Connect Supabase Project Credentials
-              </h3>
-              <p className="text-xs text-slate-500">
-                Copy from your{' '}
-                <a
-                  href="https://supabase.com/dashboard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 font-bold underline"
-                >
-                  Supabase Project Settings &rarr; API
-                </a>
-                .
-              </p>
-
-              <form onSubmit={handleSaveSupabase} className="space-y-3">
-                <div>
-                  <label className="block text-xs font-bold mb-1">Project URL</label>
-                  <input
-                    type="text"
-                    value={sbUrl}
-                    onChange={(e) => setSbUrl(e.target.value)}
-                    placeholder="https://xyzcompany.supabase.co"
-                    className="w-full h-11 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm border-0 outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold mb-1">API Key (Anon or Service Role)</label>
-                  <input
-                    type="password"
-                    value={sbKey}
-                    onChange={(e) => setSbKey(e.target.value)}
-                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    className="w-full h-11 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-sm border-0 outline-none"
-                  />
-                </div>
-
-                {sbMessage && (
-                  <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {sbMessage}
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-1">
-                  <button type="submit" disabled={sbConnecting} className="btn flex-1">
-                    {sbConnecting ? 'Connecting...' : '💾 Save & Connect'}
-                  </button>
-                  <button type="button" onClick={loadData} className="btn o flex-1">
-                    ⚡ Test Connection
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Quick Database Actions & SQL Migration */}
-            <div className="card space-y-4">
-              <h3 className="font-extrabold text-base flex items-center gap-2">
-                <span>🚀</span> Database Schema &amp; Seeding
-              </h3>
-              <p className="text-xs text-slate-500">
-                Quick actions to bootstrap your Supabase database with the complete NEET master schema and canonical questions.
-              </p>
-
-              <div className="space-y-3">
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                  <div>
-                    <b className="text-sm block">Seed 50+ Canonical NEET Qs</b>
-                    <small className="text-xs text-slate-500">Inserts initial question bank directly into Supabase</small>
-                  </div>
-                  <button
-                    onClick={handleSeedQuestions}
-                    disabled={sbSeeding}
-                    className="btn sm"
-                  >
-                    {sbSeeding ? 'Seeding...' : '🌱 Seed Qs'}
-                  </button>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                  <div>
-                    <b className="text-sm block">Copy Master SQL Schema</b>
-                    <small className="text-xs text-slate-500">266-line schema with tables, RLS policies, indexes</small>
-                  </div>
-                  <button onClick={handleCopySchema} className="btn sm o">
-                    📋 Copy SQL
-                  </button>
-                </div>
-
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-                  <div>
-                    <b className="text-sm block">PDF Automated Ingestion</b>
-                    <small className="text-xs text-slate-500">Parse question papers directly into Supabase</small>
-                  </div>
-                  <button onClick={() => setActiveTab('importPdf')} className="btn sm o">
-                    Open Ingestion &rarr;
-                  </button>
-                </div>
               </div>
             </div>
           </div>
